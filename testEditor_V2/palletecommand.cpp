@@ -5,7 +5,7 @@
 using namespace std;
 
 paletteCommand::paletteCommand(image &image) : picture(image), pixelArr(image.getPixelArr()) {
-    int SIZE = 190;
+    int SIZE = 100;
     backupPixelArr = pixelArr;
     backupW = picture.getW();
     backupH = picture.getH();
