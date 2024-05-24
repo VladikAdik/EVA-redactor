@@ -73,16 +73,25 @@ private slots:
     void on_ApplyButton_clicked();
 
 
+    void on_UNDO_clicked();
+
+    void on_APPLY_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     QGraphicsScene scene;
+    QGraphicsScene preview;
     QGraphicsPixmapItem* pixmapItem;
+    QGraphicsPixmapItem* pixmapItemPrev;
     std::unique_ptr<image> activeImage;
+    std::unique_ptr<image> previewImage;
     std::vector<pixel> palColors;
     std::vector<int> palPriority;
     QList<double> zoomList;
 
+
+    void updatePal();
     void changeColor(int priority, int r, int g, int b);
 
     int r = 0, g = 0, b = 0, ctr = 0;

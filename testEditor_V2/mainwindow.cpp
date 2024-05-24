@@ -8,6 +8,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) , ui(new Ui::MainW
     zoomList << 100 << 150 << 220 << 330 << 470 << 680;
     zoomList << 1000 << 1500 << 2200 << 3300 << 4700 << 6800;
 
+    QColor color = QColor(r, g, b);
+    QString a1 = QString("background-color: %1").arg(color.name());
+    ui->CUBE->setStyleSheet(a1);
+
 }
 
 MainWindow::~MainWindow() {
@@ -41,6 +45,40 @@ void MainWindow::on_actionClose_triggered()//CLOSE ИЗОБРАЖЕНИЕ
 
 }
 
+void MainWindow::updatePal(){
+    QColor c1 = QColor(palColors[0].getR(), palColors[0].getG(), palColors[0].getB());
+    QString s1 = QString("background-color: %1").arg(c1.name());
+    ui->pColor1->setStyleSheet(s1);
+
+    QColor c2 = QColor(palColors[1].getR(), palColors[1].getG(), palColors[1].getB());
+    QString s2 = QString("background-color: %1").arg(c2.name());
+    ui->pColor2->setStyleSheet(s2);
+
+    QColor c3 = QColor(palColors[2].getR(), palColors[2].getG(), palColors[2].getB());
+    QString s3 = QString("background-color: %1").arg(c3.name());
+    ui->pColor3->setStyleSheet(s3);
+
+    QColor c4 = QColor(palColors[3].getR(), palColors[3].getG(), palColors[3].getB());
+    QString s4 = QString("background-color: %1").arg(c4.name());
+    ui->pColor4->setStyleSheet(s4);
+
+    QColor c5 = QColor(palColors[4].getR(), palColors[4].getG(), palColors[4].getB());
+    QString s5 = QString("background-color: %1").arg(c5.name());
+    ui->pColor5->setStyleSheet(s5);
+
+    QColor c6 = QColor(palColors[5].getR(), palColors[5].getG(), palColors[5].getB());
+    QString s6 = QString("background-color: %1").arg(c6.name());
+    ui->pColor6->setStyleSheet(s6);
+
+    QColor c7 = QColor(palColors[6].getR(), palColors[6].getG(), palColors[6].getB());
+    QString s7 = QString("background-color: %1").arg(c7.name());
+    ui->pColor7->setStyleSheet(s7);
+
+    QColor c8 = QColor(palColors[7].getR(), palColors[7].getG(), palColors[7].getB());
+    QString s8 = QString("background-color: %1").arg(c8.name());
+    ui->pColor8->setStyleSheet(s8);
+}
+
 void MainWindow::on_actionOpen_triggered()//OPEN ИЗОБРАЖЕНИЕ
 {
     QString imagePath = QFileDialog::getOpenFileName(this,
@@ -48,6 +86,7 @@ void MainWindow::on_actionOpen_triggered()//OPEN ИЗОБРАЖЕНИЕ
 
     if(!imagePath.isEmpty()){
         activeImage.reset(new image(imagePath));
+        previewImage.reset(new image(imagePath));
 
         if(activeImage->isValid()){
 
@@ -59,44 +98,20 @@ void MainWindow::on_actionOpen_triggered()//OPEN ИЗОБРАЖЕНИЕ
             ui->graphicsView->setScene(&scene);
             ui->graphicsView->show();
 
+            preview.clear();
+            pixmapItemPrev = preview.addPixmap(QPixmap::fromImage(previewImage->getQImage()));
+            preview.setSceneRect(0, 0, previewImage->getW(), previewImage->getH());
+            ui->graphicsView_3->setScene(&preview);
+            ui->graphicsView_3->show();
+
             ui->statusbar->show();
             ui->graphicsView->fitInView(pixmapItem, Qt::KeepAspectRatio);
+            ui->graphicsView_3->fitInView(pixmapItemPrev, Qt::KeepAspectRatio);
 
             paletteCommand pallete(*activeImage);
             palColors = pallete.getPallete();
             palPriority = pallete.getPalletePriority();
-
-            QColor c1 = QColor(palColors[0].getR(), palColors[0].getG(), palColors[0].getB());
-            QString s1 = QString("background-color: %1").arg(c1.name());
-            ui->pColor1->setStyleSheet(s1);
-
-            QColor c2 = QColor(palColors[1].getR(), palColors[1].getG(), palColors[1].getB());
-            QString s2 = QString("background-color: %1").arg(c2.name());
-            ui->pColor2->setStyleSheet(s2);
-
-            QColor c3 = QColor(palColors[2].getR(), palColors[2].getG(), palColors[2].getB());
-            QString s3 = QString("background-color: %1").arg(c3.name());
-            ui->pColor3->setStyleSheet(s3);
-
-            QColor c4 = QColor(palColors[3].getR(), palColors[3].getG(), palColors[3].getB());
-            QString s4 = QString("background-color: %1").arg(c4.name());
-            ui->pColor4->setStyleSheet(s4);
-
-            QColor c5 = QColor(palColors[4].getR(), palColors[4].getG(), palColors[4].getB());
-            QString s5 = QString("background-color: %1").arg(c5.name());
-            ui->pColor5->setStyleSheet(s5);
-
-            QColor c6 = QColor(palColors[5].getR(), palColors[5].getG(), palColors[5].getB());
-            QString s6 = QString("background-color: %1").arg(c6.name());
-            ui->pColor6->setStyleSheet(s6);
-
-            QColor c7 = QColor(palColors[6].getR(), palColors[6].getG(), palColors[6].getB());
-            QString s7 = QString("background-color: %1").arg(c7.name());
-            ui->pColor7->setStyleSheet(s7);
-
-            QColor c8 = QColor(palColors[7].getR(), palColors[7].getG(), palColors[7].getB());
-            QString s8 = QString("background-color: %1").arg(c8.name());
-            ui->pColor8->setStyleSheet(s8);
+            updatePal();
 
         }
         else {
@@ -110,7 +125,7 @@ void MainWindow::on_actionOpen_triggered()//OPEN ИЗОБРАЖЕНИЕ
 //ИЗОБРАЖЕНИЕ ЗАКОНЧЕНО
 
 void MainWindow::changeColor(int priority, int r, int g, int b) {
-    std::vector<pixel>& pixelArr = activeImage->getPixelArr();
+    std::vector<pixel>& pixelArr = previewImage->getPixelArr();
     int dr, dg, db;
 
     for (int i = 0; i < pixelArr.size(); i++) {
@@ -122,8 +137,8 @@ void MainWindow::changeColor(int priority, int r, int g, int b) {
         }
     }
 
-    activeImage->updateArr();
-    pixmapItem->setPixmap(QPixmap::fromImage(activeImage->getQImage()));
+    previewImage->updateArr();
+    pixmapItemPrev->setPixmap(QPixmap::fromImage(previewImage->getQImage()));
 }
 
 //кнопки палитры
@@ -241,6 +256,26 @@ void MainWindow::zoomUpdate(bool increment)
     }
 }
 
+
+void MainWindow::on_UNDO_clicked()
+{
+    *previewImage = *activeImage;
+    previewImage->updateArr();
+    pixmapItemPrev->setPixmap(QPixmap::fromImage(previewImage->getQImage()));
+    paletteCommand pallete(*previewImage);
+    palColors = pallete.getPallete();
+    palPriority = pallete.getPalletePriority();
+    updatePal();
+}
+
+
+void MainWindow::on_APPLY_clicked()
+{
+    *activeImage = *previewImage;
+    activeImage->updateArr();
+    pixmapItem->setPixmap(QPixmap::fromImage(activeImage->getQImage()));
+}
+
 void MainWindow::on_toolButton_clicked()//уменьшение
 {
     if(activeImage!= nullptr) {
@@ -272,73 +307,42 @@ void MainWindow::on_SliderContrast_valueChanged(int value)//констраст
 void MainWindow::on_SliderRed_valueChanged(int value)//R
 {
     r = value;
+    QColor color = QColor(r, g, b);
+    QString a1 = QString("background-color: %1").arg(color.name());
+    ui->CUBE->setStyleSheet(a1);
 }
 
 
 void MainWindow::on_SliderBlue_valueChanged(int value)//G
 {
     b = value;
+    QColor color = QColor(r, g, b);
+    QString a1 = QString("background-color: %1").arg(color.name());
+    ui->CUBE->setStyleSheet(a1);
 }
 
 
 void MainWindow::on_SliderGreen_valueChanged(int value)//B
 {
     g = value;
+    QColor color = QColor(r, g, b);
+    QString a1 = QString("background-color: %1").arg(color.name());
+    ui->CUBE->setStyleSheet(a1);
 }
 void MainWindow::on_ApplyButton_clicked()//применить
 {
     if(activeImage!=nullptr){
-        colorMask(*activeImage, r, g, b, ctr);
-        activeImage->updateArr();
-        pixmapItem->setPixmap(QPixmap::fromImage(activeImage->getQImage()));
+        colorMask(*previewImage, r, g, b, ctr);
+        previewImage->updateArr();
+        pixmapItemPrev->setPixmap(QPixmap::fromImage(previewImage->getQImage()));
 
-        paletteCommand pallete(*activeImage);
+        paletteCommand pallete(*previewImage);
         palColors = pallete.getPallete();
         palPriority = pallete.getPalletePriority();
-
-        QColor c1 = QColor(palColors[0].getR(), palColors[0].getG(), palColors[0].getB());
-        QString s1 = QString("background-color: %1").arg(c1.name());
-        ui->pColor1->setStyleSheet(s1);
-
-        QColor c2 = QColor(palColors[1].getR(), palColors[1].getG(), palColors[1].getB());
-        QString s2 = QString("background-color: %1").arg(c2.name());
-        ui->pColor2->setStyleSheet(s2);
-
-        QColor c3 = QColor(palColors[2].getR(), palColors[2].getG(), palColors[2].getB());
-        QString s3 = QString("background-color: %1").arg(c3.name());
-        ui->pColor3->setStyleSheet(s3);
-
-        QColor c4 = QColor(palColors[3].getR(), palColors[3].getG(), palColors[3].getB());
-        QString s4 = QString("background-color: %1").arg(c4.name());
-        ui->pColor4->setStyleSheet(s4);
-
-        QColor c5 = QColor(palColors[4].getR(), palColors[4].getG(), palColors[4].getB());
-        QString s5 = QString("background-color: %1").arg(c5.name());
-        ui->pColor5->setStyleSheet(s5);
-
-        QColor c6 = QColor(palColors[5].getR(), palColors[5].getG(), palColors[5].getB());
-        QString s6 = QString("background-color: %1").arg(c6.name());
-        ui->pColor6->setStyleSheet(s6);
-
-        QColor c7 = QColor(palColors[6].getR(), palColors[6].getG(), palColors[6].getB());
-        QString s7 = QString("background-color: %1").arg(c7.name());
-        ui->pColor7->setStyleSheet(s7);
-
-        QColor c8 = QColor(palColors[7].getR(), palColors[7].getG(), palColors[7].getB());
-        QString s8 = QString("background-color: %1").arg(c8.name());
-        ui->pColor8->setStyleSheet(s8);
+        updatePal();
     }
 }
 
 //Фильбтры закончены
-
-
-
-
-
-
-
-
-
 
 
